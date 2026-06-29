@@ -9,13 +9,8 @@
     {
       "key": "example-weekly-show",
       "title": "Example Weekly Show",
-      "aliases": [
-        "Example Weekly Anime",
-        "Example Show"
-      ],
-      "autobangumiNames": [
-        "Example Weekly Show"
-      ],
+      "aliases": ["Example Weekly Anime", "Example Show"],
+      "autobangumiNames": ["Example Weekly Show"],
       "airing": {
         "weekday": 6,
         "time": "23:30",
