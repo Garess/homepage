@@ -1,0 +1,36 @@
+{
+  "settings": {
+    "enabled": true,
+    "overdueGraceHours": 12,
+    "eventLimit": 100,
+    "syncIntervalMinutes": 60
+  },
+  "shows": [
+    {
+      "key": "example-weekly-show",
+      "title": "Example Weekly Show",
+      "aliases": [
+        "Example Weekly Anime",
+        "Example Show"
+      ],
+      "autobangumiNames": [
+        "Example Weekly Show"
+      ],
+      "airing": {
+        "weekday": 6,
+        "time": "23:30",
+        "timezone": "Asia/Tokyo",
+        "firstAirDate": "2026-01-10",
+        "firstEpisode": 1,
+        "totalEpisodes": 12
+      },
+      "overrides": {
+        "expectedEpisode": null,
+        "status": null,
+        "reason": ""
+      },
+      "hidden": false,
+      "finished": false
+    }
+  ]
+}

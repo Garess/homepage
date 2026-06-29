@@ -8,6 +8,7 @@ import authentik from "./authentik/widget";
 import autobrr from "./autobrr/widget";
 import azuredevops from "./azuredevops/widget";
 import backrest from "./backrest/widget";
+import bangumi from "./bangumi/widget";
 import bazarr from "./bazarr/widget";
 import beszel from "./beszel/widget";
 import booklore from "./booklore/widget";
@@ -165,6 +166,7 @@ const widgets = {
   autobrr,
   azuredevops,
   backrest,
+  bangumi,
   bazarr,
   booklore,
   beszel,
