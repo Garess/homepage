@@ -35,7 +35,9 @@ function RecentEvent({ event }) {
   return (
     <div className="flex items-center justify-between gap-2 rounded-sm px-2 py-1 text-xs">
       <span className="truncate text-theme-700 dark:text-theme-200">{event.seriesTitle || event.showKey}</span>
-      <span className="shrink-0 text-theme-500 dark:text-theme-400">{event.episodeDisplay || episodeLabel(event.episodeNumbers?.[0])}</span>
+      <span className="shrink-0 text-theme-500 dark:text-theme-400">
+        {event.episodeDisplay || episodeLabel(event.episodeNumbers?.[0])}
+      </span>
     </div>
   );
 }

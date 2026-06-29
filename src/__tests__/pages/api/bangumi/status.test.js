@@ -49,7 +49,12 @@ describe("pages/api/bangumi/status", () => {
     );
     await writeFile(
       path.join(tmpDir, "bangumi-data", "bangumi-state.json"),
-      JSON.stringify({ updatedAt: "", shows: { demo: { lastArrivedEpisode: 1 } }, unmatchedEvents: [], autobangumi: {} }),
+      JSON.stringify({
+        updatedAt: "",
+        shows: { demo: { lastArrivedEpisode: 1 } },
+        unmatchedEvents: [],
+        autobangumi: {},
+      }),
     );
     await writeFile(path.join(tmpDir, "bangumi-data", "bangumi-events.json"), JSON.stringify({ events: [] }));
   });

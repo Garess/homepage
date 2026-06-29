@@ -140,7 +140,10 @@ describe("pages/api/admin/bangumi", () => {
   it("creates a show from a missing AutoBangumi subscription", async () => {
     const res = createMockRes();
 
-    await showsHandler(adminReq("POST", { title: "New Show", weekday: 6, time: "22:15", firstAirDate: "2026-06-20" }), res);
+    await showsHandler(
+      adminReq("POST", { title: "New Show", weekday: 6, time: "22:15", firstAirDate: "2026-06-20" }),
+      res,
+    );
 
     const schedule = JSON.parse(await readFile(path.join(tmpDir, "bangumi-schedule.json"), "utf8"));
     expect(res.statusCode).toBe(201);
@@ -151,11 +154,17 @@ describe("pages/api/admin/bangumi", () => {
 
   it("rejects invalid create and patch payloads without writing bad schedule values", async () => {
     const createRes = createMockRes();
-    await showsHandler(adminReq("POST", { title: "Bad Show", weekday: 6, time: "99:99", firstAirDate: "2026-06-20" }), createRes);
+    await showsHandler(
+      adminReq("POST", { title: "Bad Show", weekday: 6, time: "99:99", firstAirDate: "2026-06-20" }),
+      createRes,
+    );
     expect(createRes.statusCode).toBe(400);
 
     const patchRes = createMockRes();
-    await showPatchHandler({ ...adminReq("PATCH", { firstEpisode: "not-a-number" }), query: { key: "old-show" } }, patchRes);
+    await showPatchHandler(
+      { ...adminReq("PATCH", { firstEpisode: "not-a-number" }), query: { key: "old-show" } },
+      patchRes,
+    );
     expect(patchRes.statusCode).toBe(400);
   });
 
@@ -178,7 +187,10 @@ describe("pages/api/admin/bangumi", () => {
 
     const restoredRes = createMockRes();
     await showPatchHandler(
-      { ...adminReq("PATCH", { hidden: false, weekday: 3, time: "19:45", firstAirDate: "2026-06-10" }), query: { key: "old-show" } },
+      {
+        ...adminReq("PATCH", { hidden: false, weekday: 3, time: "19:45", firstAirDate: "2026-06-10" }),
+        query: { key: "old-show" },
+      },
       restoredRes,
     );
 

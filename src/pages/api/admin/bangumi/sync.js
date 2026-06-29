@@ -1,7 +1,7 @@
-import { CONF_DIR } from "utils/config/config";
 import { adminAuthorized, unauthorized } from "utils/bangumi/auth";
 import { syncAutoBangumi } from "utils/bangumi/autobangumi";
 import { atomicWriteJson, ensureBangumiDataFiles, loadJson } from "utils/bangumi/paths";
+import { CONF_DIR } from "utils/config/config";
 
 export default async function handler(req, res) {
   if (!(await adminAuthorized(req, res))) return unauthorized(res);

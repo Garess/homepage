@@ -16,10 +16,7 @@ function bearerToken(req) {
 export function adminTokenAuthorized(req) {
   const expected = process.env.HOMEPAGE_BANGUMI_ADMIN_TOKEN;
   if (!expected) return false;
-  return (
-    bearerToken(req) === expected ||
-    String(headerValue(req, "x-homepage-bangumi-admin-token") || "") === expected
-  );
+  return bearerToken(req) === expected || String(headerValue(req, "x-homepage-bangumi-admin-token") || "") === expected;
 }
 
 export function webhookAuthorized(req) {

@@ -23,7 +23,12 @@ function showSchedule(show) {
 
 function showTitleValues(show) {
   const showData = collectionObject(show);
-  return [showData.key, showData.title, ...collectionArray(showData.aliases), ...collectionArray(showData.autobangumiNames)]
+  return [
+    showData.key,
+    showData.title,
+    ...collectionArray(showData.aliases),
+    ...collectionArray(showData.autobangumiNames),
+  ]
     .map(normalizeTitle)
     .filter(Boolean);
 }
@@ -86,7 +91,8 @@ function applyEditableFields(show, payload) {
   if (title) next.title = title;
   if (payload.hidden !== undefined) next.hidden = payload.hidden;
   if (payload.finished !== undefined) next.finished = Boolean(payload.finished);
-  if (Array.isArray(payload.aliases)) next.aliases = payload.aliases.map((item) => scalarText(item).trim()).filter(Boolean);
+  if (Array.isArray(payload.aliases))
+    next.aliases = payload.aliases.map((item) => scalarText(item).trim()).filter(Boolean);
   if (Array.isArray(payload.autobangumiNames)) {
     next.autobangumiNames = payload.autobangumiNames.map((item) => scalarText(item).trim()).filter(Boolean);
   } else if (!collectionArray(next.autobangumiNames).length && title) {

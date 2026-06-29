@@ -1,7 +1,7 @@
-import { CONF_DIR } from "utils/config/config";
 import { webhookAuthorized } from "utils/bangumi/auth";
 import { recordArrivalInData } from "utils/bangumi/core";
 import { atomicWriteJson, ensureBangumiDataFiles, loadJson } from "utils/bangumi/paths";
+import { CONF_DIR } from "utils/config/config";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {

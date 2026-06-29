@@ -38,7 +38,9 @@ function showMatchValues(show) {
 function findMatchingShow(schedule, name) {
   const normalizedName = normalizeTitle(name);
   if (!normalizedName) return null;
-  return collectionArray(collectionObject(schedule).shows).find((show) => showMatchValues(show).has(normalizedName)) || null;
+  return (
+    collectionArray(collectionObject(schedule).shows).find((show) => showMatchValues(show).has(normalizedName)) || null
+  );
 }
 
 export function normalizeAutoBangumiSubscriptions(raw) {
@@ -174,7 +176,9 @@ export async function syncAutoBangumi(schedule, state, options = {}) {
 
 export async function maybeSyncAutoBangumi(schedule, state, now = new Date(), options = {}) {
   const settings = collectionObject(schedule?.settings);
-  const intervalMinutes = Number(settings.syncIntervalMinutes ?? process.env.HOMEPAGE_BANGUMI_SYNC_INTERVAL_MINUTES ?? 60);
+  const intervalMinutes = Number(
+    settings.syncIntervalMinutes ?? process.env.HOMEPAGE_BANGUMI_SYNC_INTERVAL_MINUTES ?? 60,
+  );
   const lastSyncAt = scalarText(collectionObject(state?.autobangumi).lastSyncAt);
 
   if (!options.force && lastSyncAt) {

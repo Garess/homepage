@@ -25,13 +25,27 @@ describe("bangumi autobangumi", () => {
         ],
       }),
     ).toEqual([
-      { name: "Demo", subscriptionStatus: "active", downloadStatus: "downloading", raw: { name: "Demo", enabled: true, progress: "downloading" } },
-      { name: "Other", subscriptionStatus: "disabled", downloadStatus: "paused", raw: { title: "Other", enabled: false, state: "paused" } },
+      {
+        name: "Demo",
+        subscriptionStatus: "active",
+        downloadStatus: "downloading",
+        raw: { name: "Demo", enabled: true, progress: "downloading" },
+      },
+      {
+        name: "Other",
+        subscriptionStatus: "disabled",
+        downloadStatus: "paused",
+        raw: { title: "Other", enabled: false, state: "paused" },
+      },
     ]);
 
-    expect(normalizeAutoBangumiSubscriptions([{ official_title: "Official", status: "active" }])[0].name).toBe("Official");
+    expect(normalizeAutoBangumiSubscriptions([{ official_title: "Official", status: "active" }])[0].name).toBe(
+      "Official",
+    );
     expect(normalizeAutoBangumiSubscriptions({ items: [{ name: "Items" }] })[0].name).toBe("Items");
-    expect(normalizeAutoBangumiSubscriptions({ subscriptions: [{ name: "Subscriptions" }] })[0].name).toBe("Subscriptions");
+    expect(normalizeAutoBangumiSubscriptions({ subscriptions: [{ name: "Subscriptions" }] })[0].name).toBe(
+      "Subscriptions",
+    );
     expect(normalizeAutoBangumiSubscriptions({ results: [{ name: "Results" }] })[0].name).toBe("Results");
   });
 
@@ -67,10 +81,15 @@ describe("bangumi autobangumi", () => {
       shows: [{ key: "demo", title: "Demo Show", autobangumiNames: ["Demo"] }],
     };
     const state = { shows: {}, autobangumi: {} };
-    const result = mergeAutoBangumiSubscriptions(schedule, state, [
-      { name: "Demo", subscriptionStatus: "active", downloadStatus: "ready" },
-      { name: "Missing", subscriptionStatus: "active", downloadStatus: "" },
-    ], new Date("2026-06-17T12:00:00Z"));
+    const result = mergeAutoBangumiSubscriptions(
+      schedule,
+      state,
+      [
+        { name: "Demo", subscriptionStatus: "active", downloadStatus: "ready" },
+        { name: "Missing", subscriptionStatus: "active", downloadStatus: "" },
+      ],
+      new Date("2026-06-17T12:00:00Z"),
+    );
 
     expect(result).toEqual({ matched: 1, missingSchedule: 1, missingScheduleNames: ["Missing"] });
     expect(state.shows.demo.autobangumi.subscriptionName).toBe("Demo");

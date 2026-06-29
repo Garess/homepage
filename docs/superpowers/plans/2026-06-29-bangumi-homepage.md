@@ -32,6 +32,7 @@
 ## Task 1: Bangumi Core Data Model
 
 **Files:**
+
 - Create: `src/utils/bangumi/paths.js`
 - Create: `src/utils/bangumi/core.js`
 - Test: `src/utils/bangumi/core.test.js`
@@ -94,11 +95,21 @@ describe("bangumi core", () => {
         firstEpisode: 1,
       },
     };
-    expect(deriveStatus(show, { lastArrivedEpisode: 3 }, new Date("2026-06-17T12:00:00+08:00"), 12).status).toBe("arrived");
-    expect(deriveStatus(show, { lastArrivedEpisode: 2 }, new Date("2026-06-17T09:00:00+08:00"), 12).status).toBe("today");
-    expect(deriveStatus(show, { lastArrivedEpisode: 2 }, new Date("2026-06-17T13:00:00+08:00"), 12).status).toBe("waiting");
-    expect(deriveStatus(show, { lastArrivedEpisode: 2 }, new Date("2026-06-18T00:30:00+08:00"), 12).status).toBe("overdue");
-    expect(deriveStatus({ key: "x", title: "X" }, {}, new Date("2026-06-17T12:00:00+08:00"), 12).status).toBe("missing_schedule");
+    expect(deriveStatus(show, { lastArrivedEpisode: 3 }, new Date("2026-06-17T12:00:00+08:00"), 12).status).toBe(
+      "arrived",
+    );
+    expect(deriveStatus(show, { lastArrivedEpisode: 2 }, new Date("2026-06-17T09:00:00+08:00"), 12).status).toBe(
+      "today",
+    );
+    expect(deriveStatus(show, { lastArrivedEpisode: 2 }, new Date("2026-06-17T13:00:00+08:00"), 12).status).toBe(
+      "waiting",
+    );
+    expect(deriveStatus(show, { lastArrivedEpisode: 2 }, new Date("2026-06-18T00:30:00+08:00"), 12).status).toBe(
+      "overdue",
+    );
+    expect(deriveStatus({ key: "x", title: "X" }, {}, new Date("2026-06-17T12:00:00+08:00"), 12).status).toBe(
+      "missing_schedule",
+    );
   });
 
   it("builds timeline payload and records matched and unmatched arrivals", () => {
@@ -152,6 +163,7 @@ Expected: all tests in `core.test.js` pass.
 ## Task 2: AutoBangumi Sync
 
 **Files:**
+
 - Create: `src/utils/bangumi/autobangumi.js`
 - Test: `src/utils/bangumi/autobangumi.test.js`
 
@@ -178,6 +190,7 @@ Expected: all AutoBangumi tests pass.
 ## Task 3: Bangumi API Routes and Authorization
 
 **Files:**
+
 - Create: `src/utils/bangumi/auth.js`
 - Create: `src/pages/api/bangumi/status.js`
 - Create: `src/pages/api/bangumi/webhook/arrival.js`
@@ -212,6 +225,7 @@ Expected: all route tests pass.
 ## Task 4: Bangumi Widget Registration and UI
 
 **Files:**
+
 - Create: `src/widgets/bangumi/widget.js`
 - Create: `src/widgets/bangumi/proxy.js`
 - Create: `src/widgets/bangumi/component.jsx`
@@ -245,6 +259,7 @@ Expected: all widget/config tests pass.
 ## Task 5: Documentation and Example Schedule
 
 **Files:**
+
 - Create: `docs/widgets/services/bangumi.md`
 - Create: `src/skeleton/bangumi-schedule.json`
 - Modify: `docs/widgets/services/index.md`
@@ -262,6 +277,7 @@ Expected: Bangumi docs, index link, and skeleton file appear.
 ## Task 6: Integration Verification and Local Page Test
 
 **Files:**
+
 - Modify only if fixes are needed after verification.
 
 - [ ] **Step 1: Run focused Bangumi tests**

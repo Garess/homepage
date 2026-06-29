@@ -1,7 +1,7 @@
-import { CONF_DIR } from "utils/config/config";
 import { maybeSyncAutoBangumi } from "utils/bangumi/autobangumi";
 import { makeTimelinePayload } from "utils/bangumi/core";
 import { atomicWriteJson, ensureBangumiDataFiles, loadJson } from "utils/bangumi/paths";
+import { CONF_DIR } from "utils/config/config";
 
 async function loadBangumiFiles() {
   const paths = await ensureBangumiDataFiles(CONF_DIR);

@@ -1,7 +1,7 @@
-import { CONF_DIR } from "utils/config/config";
 import { adminAuthorized, unauthorized } from "utils/bangumi/auth";
 import { patchManagedShow } from "utils/bangumi/manage";
 import { atomicWriteJson, ensureBangumiDataFiles, loadJson } from "utils/bangumi/paths";
+import { CONF_DIR } from "utils/config/config";
 
 function queryKey(req) {
   const key = req?.query?.key;
