@@ -1,5 +1,7 @@
+import { promises as fs } from "fs";
 import { copyFileSync, existsSync, mkdirSync, readFileSync } from "fs";
 import { join } from "path";
+import path from "path";
 
 import yaml from "js-yaml";
 import cache from "memory-cache";
@@ -11,6 +13,57 @@ const homepageFilePrefix = "HOMEPAGE_FILE_";
 export const CONF_DIR = process.env.HOMEPAGE_CONFIG_DIR
   ? process.env.HOMEPAGE_CONFIG_DIR
   : join(process.cwd(), "config");
+
+const ADMIN_EDITABLE_CONFIG_FILES = new Set(["settings.yaml", "services.yaml", "bookmarks.yaml"]);
+const ADMIN_VISUAL_SETTINGS_KEYS = ["background", "cardBlur", "theme", "color", "title"];
+
+function configPath(fileName) {
+  if (!ADMIN_EDITABLE_CONFIG_FILES.has(fileName)) {
+    throw new Error(`Unsupported admin config file '${fileName}'`);
+  }
+  return join(CONF_DIR, fileName);
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function cloneConfig(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => cloneConfig(entry));
+  }
+  if (isPlainObject(value)) {
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, cloneConfig(entry)]));
+  }
+  return value;
+}
+
+function mergeSettingsObjects(current, patch) {
+  const merged = cloneConfig(current ?? {});
+
+  for (const [key, value] of Object.entries(patch ?? {})) {
+    if (isPlainObject(value) && isPlainObject(merged[key])) {
+      merged[key] = mergeSettingsObjects(merged[key], value);
+    } else {
+      merged[key] = cloneConfig(value);
+    }
+  }
+
+  return merged;
+}
+
+function normalizeSettings(settings) {
+  const source = cloneConfig(settings ?? {});
+  if (Array.isArray(source.layout)) {
+    const layoutItems = source.layout;
+    source.layout = {};
+    layoutItems.forEach((item) => {
+      const name = Object.keys(item)[0];
+      source.layout[name] = item[name];
+    });
+  }
+  return source;
+}
 
 export default function checkAndCopyConfig(config) {
   // Ensure config directory exists
@@ -49,6 +102,53 @@ export default function checkAndCopyConfig(config) {
   }
 }
 
+export function readYamlConfig(fileName) {
+  checkAndCopyConfig(fileName);
+  const rawFileContents = readFileSync(configPath(fileName), "utf8");
+  const parsed = yaml.load(substituteEnvironmentVars(rawFileContents));
+  return parsed ?? (fileName === "settings.yaml" ? {} : []);
+}
+
+export async function atomicWriteYamlConfig(fileName, data) {
+  const filePath = configPath(fileName);
+  await fs.mkdir(CONF_DIR, { recursive: true });
+  const temporaryPath = path.join(
+    path.dirname(filePath),
+    `.${path.basename(filePath)}.${process.pid}.${Date.now()}.tmp`,
+  );
+
+  try {
+    const dumped = `${yaml.dump(data, { lineWidth: -1, noRefs: true })}\n`;
+    await fs.writeFile(temporaryPath, dumped, "utf8");
+    await fs.rename(temporaryPath, filePath);
+  } catch (error) {
+    await fs.rm(temporaryPath, { force: true });
+    throw error;
+  }
+}
+
+export function normalizeSettingsForAdmin(settings) {
+  const source = normalizeSettings(settings);
+  return Object.fromEntries(
+    ADMIN_VISUAL_SETTINGS_KEYS.filter((key) => Object.hasOwn(source, key)).map((key) => [key, cloneConfig(source[key])]),
+  );
+}
+
+export function mergeSettingsPatch(current, patch) {
+  return mergeSettingsObjects(normalizeSettings(current), patch);
+}
+
+export async function writeSettingsConfig(patch, validate = () => true) {
+  const current = readYamlConfig("settings.yaml");
+  const next = mergeSettingsPatch(current, patch);
+  const validationResult = await validate(next);
+  if (validationResult === false) {
+    throw new Error("settings validation failed");
+  }
+  await atomicWriteYamlConfig("settings.yaml", next);
+  return next;
+}
+
 function getCachedEnvironmentVars() {
   let cachedVars = cache.get(cacheKey);
   if (!cachedVars) {
@@ -82,22 +182,5 @@ export function substituteEnvironmentVars(str) {
 export function getSettings() {
   checkAndCopyConfig("settings.yaml");
 
-  const settingsYaml = join(CONF_DIR, "settings.yaml");
-  const rawFileContents = readFileSync(settingsYaml, "utf8");
-  const fileContents = substituteEnvironmentVars(rawFileContents);
-  const initialSettings = yaml.load(fileContents) ?? {};
-
-  if (initialSettings.layout) {
-    // support yaml list but old spec was object so convert to that
-    // see https://github.com/gethomepage/homepage/issues/1546
-    if (Array.isArray(initialSettings.layout)) {
-      const layoutItems = initialSettings.layout;
-      initialSettings.layout = {};
-      layoutItems.forEach((i) => {
-        const name = Object.keys(i)[0];
-        initialSettings.layout[name] = i[name];
-      });
-    }
-  }
-  return initialSettings;
+  return normalizeSettings(readYamlConfig("settings.yaml"));
 }
