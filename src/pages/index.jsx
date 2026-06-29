@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import Script from "next/script";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { BiError } from "react-icons/bi";
+import { BiCog } from "react-icons/bi";
 import useSWR, { SWRConfig } from "swr";
 import { ColorContext } from "utils/contexts/color";
 import { SettingsContext } from "utils/contexts/settings";
@@ -500,6 +501,13 @@ function Home({ initialSettings }) {
 
         <div id="footer" className="flex flex-col mt-auto p-8 w-full">
           <div id="style" className="flex w-full justify-end">
+            <a
+              href="/admin"
+              className="mr-2 inline-flex items-center gap-1 rounded-full border border-theme-500/20 px-3 py-1 text-sm text-theme-700 transition hover:bg-white/70 dark:border-white/10 dark:text-theme-200 dark:hover:bg-white/10"
+            >
+              <BiCog className="h-4 w-4" />
+              Admin
+            </a>
             {!settings?.color && <ColorToggle />}
             <Revalidate />
             {!settings.theme && <ThemeToggle />}

@@ -45,6 +45,7 @@ function bookmarkRecord(bookmark) {
   const record = {};
   Object.entries(bookmark).forEach(([key, value]) => {
     if (key === "name") return;
+    if (value === "" || value === undefined || value === null) return;
     record[key] = value;
   });
   return record;

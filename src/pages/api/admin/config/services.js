@@ -5,7 +5,7 @@ import yaml from "js-yaml";
 
 import { adminAuthorized, unauthorized } from "utils/bangumi/auth";
 import { CONF_DIR } from "utils/config/config";
-import { cleanServiceGroups, servicesFromConfig } from "utils/config/service-helpers";
+import { servicesFromConfig } from "utils/config/service-helpers";
 
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -47,6 +47,8 @@ function serviceRecord(service) {
   const record = {};
   Object.entries(service).forEach(([key, value]) => {
     if (key === "name" || key === "type" || key === "groups") return;
+    if (value === "" || value === undefined || value === null) return;
+    if (key === "widgets" && Array.isArray(value) && value.length === 0) return;
     record[key] = value;
   });
   return record;
@@ -88,7 +90,7 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const groups = cleanServiceGroups(await servicesFromConfig());
+      const groups = await servicesFromConfig();
       return res.status(200).json(groups);
     } catch (error) {
       return res.status(500).json({ error: "services_load_failed" });
