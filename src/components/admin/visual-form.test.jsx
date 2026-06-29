@@ -37,7 +37,7 @@ describe("components/admin/visual-form", () => {
 
     expect(await screen.findByDisplayValue("Demo")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Updated" } });
-    fireEvent.change(screen.getByLabelText("Background opacity"), { target: { value: "55" } });
+    fireEvent.change(screen.getByLabelText("Background Opacity"), { target: { value: "55" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
