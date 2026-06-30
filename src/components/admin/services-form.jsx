@@ -5,9 +5,8 @@ export default function ServicesForm() {
     <GroupsForm
       kind="services"
       endpoint="/api/admin/config/services"
-      title="Services"
-      emptyLabel="Add your first service group."
-      saveLabel="Save services"
+      title="服务"
+      emptyLabel="添加第一个服务分组。"
     />
   );
 }

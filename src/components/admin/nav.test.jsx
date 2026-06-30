@@ -9,7 +9,7 @@ describe("components/admin/nav", () => {
   it("renders the admin section links", () => {
     render(<AdminNav active="/admin/visual" />);
 
-    expect(screen.getByRole("link", { name: "Visual Settings" })).toHaveAttribute("href", "/admin/visual");
-    expect(screen.getByRole("link", { name: "Content" })).toHaveAttribute("href", "/admin/content");
+    expect(screen.getByRole("link", { name: "视觉设置" })).toHaveAttribute("href", "/admin/visual");
+    expect(screen.getByRole("link", { name: "服务与书签" })).toHaveAttribute("href", "/admin/content");
   });
 });

@@ -2,8 +2,8 @@ import classNames from "classnames";
 import Link from "next/link";
 
 const items = [
-  { href: "/admin/visual", label: "Visual Settings" },
-  { href: "/admin/content", label: "Content" },
+  { href: "/admin/visual", label: "视觉设置" },
+  { href: "/admin/content", label: "服务与书签" },
 ];
 
 export default function AdminNav({ active = "/admin" }) {

@@ -60,7 +60,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
       })
       .catch(() => {
         if (!alive) return;
-        setError(`Failed to load ${title.toLowerCase()}.`);
+        setError(`${title}加载失败。`);
         setLoading(false);
       });
     return () => {
@@ -89,19 +89,19 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || `Unable to save ${title.toLowerCase()}.`);
+        throw new Error(data.error || `${title}保存失败。`);
       }
       await fetch("/api/revalidate");
       window.location.reload();
     } catch (err) {
-      setError(err.message || `Unable to save ${title.toLowerCase()}.`);
+      setError(err.message || `${title}保存失败。`);
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return <div className="text-sm text-theme-600 dark:text-theme-300">Loading {title.toLowerCase()}...</div>;
+    return <div className="text-sm text-theme-600 dark:text-theme-300">正在加载{title}...</div>;
   }
 
   return (
@@ -110,7 +110,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
         <h2 className="text-xl font-semibold">{title}</h2>
         <button type="button" onClick={addGroup} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
           <BiPlus />
-          Add group
+          添加分组
         </button>
       </div>
 
@@ -123,7 +123,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
               <input
                 className="min-w-0 flex-1 rounded-md border bg-transparent px-3 py-2 text-sm"
                 value={group.name}
-                placeholder="Group name"
+                placeholder="分组名称"
                 onChange={(e) => updateGroup(groupIndex, { name: e.target.value })}
               />
               <button
@@ -132,7 +132,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
               >
                 <BiTrash />
-                Delete
+                删除
               </button>
             </div>
 
@@ -142,7 +142,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                   <div key={bookmarkIndex} className="grid gap-3 rounded-md border border-theme-500/10 p-3 md:grid-cols-2">
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Name"
+                      placeholder="名称"
                       value={bookmark.name || ""}
                       onChange={(e) => {
                         const next = [...group.bookmarks];
@@ -152,7 +152,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Href"
+                      placeholder="链接"
                       value={bookmark.href || ""}
                       onChange={(e) => {
                         const next = [...group.bookmarks];
@@ -162,7 +162,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Abbr"
+                      placeholder="缩写"
                       value={bookmark.abbr || ""}
                       onChange={(e) => {
                         const next = [...group.bookmarks];
@@ -172,7 +172,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Icon"
+                      placeholder="图标"
                       value={bookmark.icon || ""}
                       onChange={(e) => {
                         const next = [...group.bookmarks];
@@ -182,7 +182,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm md:col-span-2"
-                      placeholder="Description"
+                      placeholder="描述"
                       value={bookmark.description || ""}
                       onChange={(e) => {
                         const next = [...group.bookmarks];
@@ -198,7 +198,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                   className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
                 >
                   <BiPlus />
-                  Add bookmark
+                  添加书签
                 </button>
               </div>
             ) : (
@@ -207,25 +207,25 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                   <div key={serviceIndex} className="grid gap-3 rounded-md border border-theme-500/10 p-3 md:grid-cols-2">
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Name"
+                      placeholder="名称"
                       value={service.name || ""}
                       onChange={(e) => updateGroup(groupIndex, { services: updateService(group, serviceIndex, { name: e.target.value }) })}
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Href"
+                      placeholder="链接"
                       value={service.href || ""}
                       onChange={(e) => updateGroup(groupIndex, { services: updateService(group, serviceIndex, { href: e.target.value }) })}
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Icon"
+                      placeholder="图标"
                       value={service.icon || ""}
                       onChange={(e) => updateGroup(groupIndex, { services: updateService(group, serviceIndex, { icon: e.target.value }) })}
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Description"
+                      placeholder="描述"
                       value={service.description || ""}
                       onChange={(e) =>
                         updateGroup(groupIndex, { services: updateService(group, serviceIndex, { description: e.target.value }) })
@@ -233,7 +233,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Widget type"
+                      placeholder="组件类型"
                       value={service.widgets?.[0]?.type || ""}
                       onChange={(e) =>
                         updateGroup(groupIndex, {
@@ -243,7 +243,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
-                      placeholder="Widget URL"
+                      placeholder="组件 URL"
                       value={service.widgets?.[0]?.url || ""}
                       onChange={(e) =>
                         updateGroup(groupIndex, {
@@ -259,7 +259,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
                   className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
                 >
                   <BiPlus />
-                  Add service
+                  添加服务
                 </button>
               </div>
             )}
@@ -277,7 +277,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
           className={classNames("inline-flex items-center gap-2 rounded-md bg-theme-600 px-3 py-2 text-sm text-white", saving && "opacity-60")}
         >
           <BiSave />
-          Save
+          保存
         </button>
       </div>
     </div>

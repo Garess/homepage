@@ -1,4 +1,4 @@
-import { readFileSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -20,6 +20,7 @@ describe("pages/api/admin/config", () => {
 
   async function loadHandlers() {
     return {
+      background: (await import("pages/api/admin/config/visual/background")).default,
       visual: (await import("pages/api/admin/config/visual")).default,
       services: (await import("pages/api/admin/config/services")).default,
       bookmarks: (await import("pages/api/admin/config/bookmarks")).default,
@@ -307,5 +308,50 @@ describe("pages/api/admin/config", () => {
     await bookmarks({ method: "PUT", headers: authHeaders, body: [{ bookmarks: [] }], query: {} }, bookmarksRes);
     expect(bookmarksRes.statusCode).toBe(400);
     expect(readFileSync(path.join(configDir, "bookmarks.yaml"), "utf8")).toBe(bookmarksBefore);
+  });
+
+  it("stores uploaded visual backgrounds in a public backgrounds directory", async () => {
+    const { background } = await loadHandlers();
+    const authHeaders = { authorization: "Bearer admin-secret" };
+    const image = Buffer.from("fake-webp");
+
+    const res = createMockRes();
+    await background(
+      {
+        method: "POST",
+        headers: {
+          ...authHeaders,
+          "content-type": "image/webp",
+        },
+        body: image,
+        query: {},
+      },
+      res,
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ path: "/backgrounds/admin-background.webp" });
+    expect(existsSync(path.join(configDir, "..", "public", "backgrounds", "admin-background.webp"))).toBe(true);
+  });
+
+  it("rejects unsupported visual background uploads", async () => {
+    const { background } = await loadHandlers();
+    const authHeaders = { authorization: "Bearer admin-secret" };
+
+    const res = createMockRes();
+    await background(
+      {
+        method: "POST",
+        headers: {
+          ...authHeaders,
+          "content-type": "text/plain",
+        },
+        body: Buffer.from("not an image"),
+        query: {},
+      },
+      res,
+    );
+
+    expect(res.statusCode).toBe(400);
   });
 });

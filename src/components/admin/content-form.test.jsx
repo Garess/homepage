@@ -67,15 +67,15 @@ describe("components/admin/content forms", () => {
       <GroupsForm
         kind="services"
         endpoint="/api/admin/config/services"
-        title="Services"
-        emptyLabel="Add your first service group."
+        title="服务"
+        emptyLabel="添加第一个服务分组。"
       />,
     );
 
     expect(await screen.findByDisplayValue("Homepage")).toBeInTheDocument();
 
     fireEvent.change(screen.getByDisplayValue("Homepage"), { target: { value: "Homepage Admin" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
@@ -105,8 +105,8 @@ describe("components/admin/content forms", () => {
       <GroupsForm
         kind="bookmarks"
         endpoint="/api/admin/config/bookmarks"
-        title="Bookmarks"
-        emptyLabel="Add your first bookmark group."
+        title="书签"
+        emptyLabel="添加第一个书签分组。"
       />,
     );
 
@@ -114,7 +114,7 @@ describe("components/admin/content forms", () => {
 
     fireEvent.change(screen.getByDisplayValue("Github"), { target: { value: "GitHub Docs" } });
     fireEvent.change(screen.getByDisplayValue("GH"), { target: { value: "GD" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/api/admin/config/bookmarks", expect.any(Object));
