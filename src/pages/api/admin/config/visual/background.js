@@ -13,6 +13,7 @@ const UPLOAD_TYPES = {
 };
 
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+const BACKGROUND_ASSET_PREFIX = "/api/assets/backgrounds";
 
 function publicDir() {
   return process.env.HOMEPAGE_PUBLIC_DIR || path.join(path.dirname(CONF_DIR), "public");
@@ -62,7 +63,7 @@ export default async function handler(req, res) {
     const fileName = `admin-background.${extension}`;
     await fs.writeFile(path.join(backgroundsDir, fileName), body);
 
-    return res.status(200).json({ path: `/backgrounds/${fileName}` });
+    return res.status(200).json({ path: `${BACKGROUND_ASSET_PREFIX}/${fileName}` });
   } catch (error) {
     if (error?.type === "entity.too.large") {
       return res.status(400).json({ error: "上传图片不能超过 8MB。" });

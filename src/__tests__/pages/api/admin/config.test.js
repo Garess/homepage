@@ -20,6 +20,7 @@ describe("pages/api/admin/config", () => {
 
   async function loadHandlers() {
     return {
+      assetBackground: (await import("pages/api/assets/backgrounds/[file]")).default,
       background: (await import("pages/api/admin/config/visual/background")).default,
       visual: (await import("pages/api/admin/config/visual")).default,
       services: (await import("pages/api/admin/config/services")).default,
@@ -310,8 +311,8 @@ describe("pages/api/admin/config", () => {
     expect(readFileSync(path.join(configDir, "bookmarks.yaml"), "utf8")).toBe(bookmarksBefore);
   });
 
-  it("stores uploaded visual backgrounds in a public backgrounds directory", async () => {
-    const { background } = await loadHandlers();
+  it("stores uploaded visual backgrounds and returns a dynamic asset URL", async () => {
+    const { background, assetBackground } = await loadHandlers();
     const authHeaders = { authorization: "Bearer admin-secret" };
     const image = Buffer.from("fake-webp");
 
@@ -330,8 +331,16 @@ describe("pages/api/admin/config", () => {
     );
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ path: "/backgrounds/admin-background.webp" });
+    expect(res.body).toEqual({ path: "/api/assets/backgrounds/admin-background.webp" });
     expect(existsSync(path.join(configDir, "..", "public", "backgrounds", "admin-background.webp"))).toBe(true);
+
+    const assetRes = createMockRes();
+    await assetBackground({ method: "GET", headers: {}, query: { file: "admin-background.webp" } }, assetRes);
+
+    expect(assetRes.statusCode).toBe(200);
+    expect(assetRes.headers["Content-Type"]).toBe("image/webp");
+    expect(assetRes.headers["Cache-Control"]).toBe("no-store, max-age=0");
+    expect(assetRes.body).toEqual(image);
   });
 
   it("rejects unsupported visual background uploads", async () => {

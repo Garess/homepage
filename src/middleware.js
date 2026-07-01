@@ -11,6 +11,10 @@ function hasMcpToken(req) {
   return req.headers.get("authorization") === `Bearer ${token}` || req.headers.get("x-homepage-mcp-token") === token;
 }
 
+function isPublicAssetPath(pathname) {
+  return pathname.startsWith("/api/assets/backgrounds/");
+}
+
 export async function middleware(req) {
   // Check the Host header, if HOMEPAGE_ALLOWED_HOSTS is set
   const host = req.headers.get("host");
@@ -27,8 +31,9 @@ export async function middleware(req) {
     return NextResponse.json({ error: "Host validation failed. See logs for more details." }, { status: 400 });
   }
 
-  if (authEnabled && !new URL(req.url).pathname.startsWith("/api/healthcheck")) {
-    if (new URL(req.url).pathname === "/api/mcp" && hasMcpToken(req)) {
+  const pathname = new URL(req.url).pathname;
+  if (authEnabled && !pathname.startsWith("/api/healthcheck") && !isPublicAssetPath(pathname)) {
+    if (pathname === "/api/mcp" && hasMcpToken(req)) {
       return NextResponse.next();
     }
 

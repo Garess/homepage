@@ -81,7 +81,7 @@ describe("components/admin/visual-form", () => {
       if (url === "/api/admin/config/visual/background") {
         return Promise.resolve({
           ok: true,
-          json: async () => ({ path: "/backgrounds/admin-background.webp" }),
+          json: async () => ({ path: "/api/assets/backgrounds/admin-background.webp" }),
         });
       }
       return Promise.resolve({ ok: true, json: async () => ({}) });
@@ -94,7 +94,7 @@ describe("components/admin/visual-form", () => {
     fireEvent.change(screen.getByLabelText("上传背景图片"), { target: { files: [file] } });
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue("/backgrounds/admin-background.webp")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("/api/assets/backgrounds/admin-background.webp")).toBeInTheDocument();
     });
 
     const uploadCall = fetch.mock.calls.find(([url]) => url === "/api/admin/config/visual/background");
