@@ -50,6 +50,17 @@ describe("components/widgets/widget", () => {
     expect(forwarded.style).toEqual({ header: "boxedWidgets" });
   });
 
+  it("renders the bangumi information widget instead of the missing fallback", () => {
+    render(<Widget widget={{ type: "bangumi", options: {} }} style={{ header: "clean" }} />);
+
+    const el = screen.getByTestId("dynamic-widget");
+    expect(el.getAttribute("data-loader")).toContain("bangumi/bangumi");
+
+    const forwarded = JSON.parse(el.getAttribute("data-options"));
+    expect(forwarded.style).toEqual({ header: "clean" });
+    expect(screen.queryByText("Missing")).not.toBeInTheDocument();
+  });
+
   it("renders a missing message when widget type is unknown", () => {
     render(<Widget widget={{ type: "nope", options: {} }} style={{}} />);
     expect(screen.getByText("Missing")).toBeInTheDocument();
