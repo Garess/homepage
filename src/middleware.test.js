@@ -159,4 +159,38 @@ describe("middleware", () => {
     expect(NextResponse.next).toHaveBeenCalled();
     expect(res).toEqual({ type: "next" });
   });
+
+  it("allows Bangumi admin API requests with the admin token when auth is enabled", async () => {
+    process.env.HOMEPAGE_AUTH_ENABLED = "true";
+    process.env.HOMEPAGE_AUTH_SECRET = "secret";
+    process.env.HOMEPAGE_BANGUMI_ADMIN_TOKEN = "admin-secret";
+
+    const middleware = await loadMiddleware();
+    const res = await middleware(
+      createReq("localhost:3000", "http://localhost:3000/api/admin/bangumi/manage", {
+        "x-homepage-bangumi-admin-token": "admin-secret",
+      }),
+    );
+
+    expect(getToken).not.toHaveBeenCalled();
+    expect(NextResponse.next).toHaveBeenCalled();
+    expect(res).toEqual({ type: "next" });
+  });
+
+  it("allows Bangumi webhook requests with the webhook token when auth is enabled", async () => {
+    process.env.HOMEPAGE_AUTH_ENABLED = "true";
+    process.env.HOMEPAGE_AUTH_SECRET = "secret";
+    process.env.HOMEPAGE_BANGUMI_WEBHOOK_TOKEN = "webhook-secret";
+
+    const middleware = await loadMiddleware();
+    const res = await middleware(
+      createReq("localhost:3000", "http://localhost:3000/api/bangumi/webhook/arrival", {
+        "x-homepage-bangumi-token": "webhook-secret",
+      }),
+    );
+
+    expect(getToken).not.toHaveBeenCalled();
+    expect(NextResponse.next).toHaveBeenCalled();
+    expect(res).toEqual({ type: "next" });
+  });
 });

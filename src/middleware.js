@@ -11,6 +11,20 @@ function hasMcpToken(req) {
   return req.headers.get("authorization") === `Bearer ${token}` || req.headers.get("x-homepage-mcp-token") === token;
 }
 
+function hasBangumiAdminToken(req) {
+  const token = process.env.HOMEPAGE_BANGUMI_ADMIN_TOKEN;
+  if (!token) return false;
+
+  return req.headers.get("authorization") === `Bearer ${token}` || req.headers.get("x-homepage-bangumi-admin-token") === token;
+}
+
+function hasBangumiWebhookToken(req) {
+  const token = process.env.HOMEPAGE_BANGUMI_WEBHOOK_TOKEN;
+  if (!token) return false;
+
+  return req.headers.get("x-homepage-bangumi-token") === token || req.headers.get("x-homelab-webhook-token") === token;
+}
+
 function isPublicAssetPath(pathname) {
   return pathname.startsWith("/api/assets/backgrounds/");
 }
@@ -34,6 +48,12 @@ export async function middleware(req) {
   const pathname = new URL(req.url).pathname;
   if (authEnabled && !pathname.startsWith("/api/healthcheck") && !isPublicAssetPath(pathname)) {
     if (pathname === "/api/mcp" && hasMcpToken(req)) {
+      return NextResponse.next();
+    }
+    if (pathname.startsWith("/api/admin/bangumi/") && hasBangumiAdminToken(req)) {
+      return NextResponse.next();
+    }
+    if (pathname.startsWith("/api/bangumi/webhook/") && hasBangumiWebhookToken(req)) {
       return NextResponse.next();
     }
 

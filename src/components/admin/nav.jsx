@@ -4,6 +4,7 @@ import Link from "next/link";
 const items = [
   { href: "/admin/visual", label: "视觉设置" },
   { href: "/admin/content", label: "服务与书签" },
+  { href: "/admin/bangumi", label: "追番管理" },
 ];
 
 export default function AdminNav({ active = "/admin" }) {
