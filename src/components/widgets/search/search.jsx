@@ -11,11 +11,13 @@ import {
 } from "@headlessui/react";
 import classNames from "classnames";
 import { useTranslation } from "next-i18next/pages";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useMemo, useState } from "react";
 import { BiLogoBing } from "react-icons/bi";
 import { FiSearch } from "react-icons/fi";
 import { SiBaidu, SiBrave, SiDuckduckgo, SiGoogle } from "react-icons/si";
+import { SettingsContext } from "utils/contexts/settings";
 
+import ResolvedIcon from "../../resolvedicon";
 import ContainerForm from "../widget/container_form";
 import Raw from "../widget/raw";
 
@@ -79,14 +81,29 @@ export function getStoredProvider() {
   return null;
 }
 
-export default function Search({ options }) {
+export default function Search({ options, servicesAndBookmarks = [] }) {
   const { t } = useTranslation();
+  const { settings } = useContext(SettingsContext);
+  const { searchDescriptions = false } = settings?.quicklaunch ?? {};
 
   const availableProviderIds = getAvailableProviderIds(options) ?? [];
 
   const [query, setQuery] = useState("");
   const [selectedProvider, setSelectedProvider] = useState(searchProviders[availableProviderIds[0] ?? "google"]);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const normalizedQuery = query.trim().toLowerCase();
+  const serviceBookmarkResults = useMemo(() => {
+    if (!normalizedQuery) return [];
+
+    const results = servicesAndBookmarks.filter((result) => {
+      const nameMatch = result.name?.toLowerCase().includes(normalizedQuery);
+      const descriptionMatch = searchDescriptions && result.description?.toLowerCase().includes(normalizedQuery);
+
+      return nameMatch || descriptionMatch;
+    });
+
+    return results.slice(0, 5);
+  }, [normalizedQuery, searchDescriptions, servicesAndBookmarks]);
 
   useEffect(() => {
     const storedProvider = getStoredProvider();
@@ -142,6 +159,11 @@ export default function Search({ options }) {
 
     setQuery("");
     currentSuggestion = null;
+  }
+
+  function openServiceBookmarkResult(result) {
+    window.open(result.href, result.target ?? options.target ?? "_blank", "noreferrer");
+    setQuery("");
   }
 
   const handleSearchKeyDown = (event) => {
@@ -245,39 +267,78 @@ export default function Search({ options }) {
               </Transition>
             </Listbox>
 
-            {searchSuggestions[1]?.length > 0 && (
-              <ComboboxOptions className="mt-1 rounded-md bg-theme-50 dark:bg-theme-800 border border-theme-300 dark:border-theme-200/30 cursor-pointer shadow-lg">
-                <div className="p-1 bg-white/50 dark:bg-white/10 text-theme-900/90 dark:text-white/90 text-xs">
-                  <ComboboxOption key={query} value={query} />
-                  {searchSuggestions[1].map((suggestion) => (
-                    <ComboboxOption
-                      key={suggestion}
-                      value={suggestion}
-                      onMouseDown={() => {
-                        doSearch(suggestion);
-                      }}
-                      className="flex w-full"
-                    >
-                      {({ active }) => {
-                        if (active) currentSuggestion = suggestion;
-                        return (
-                          <div
-                            className={classNames(
-                              "px-2 py-1 rounded-md w-full flex-nowrap",
-                              active ? "bg-theme-300/20 dark:bg-white/10" : "",
-                            )}
-                          >
-                            <span className="whitespace-pre">{suggestion.indexOf(query) === 0 ? query : ""}</span>
-                            <span className="mr-4 whitespace-pre opacity-50">
-                              {suggestion.indexOf(query) === 0 ? suggestion.substring(query.length) : suggestion}
+            {(serviceBookmarkResults.length > 0 || searchSuggestions[1]?.length > 0) && (
+              <div className="mt-1 rounded-md bg-theme-50 dark:bg-theme-800 border border-theme-300 dark:border-theme-200/30 cursor-pointer shadow-lg overflow-hidden">
+                {serviceBookmarkResults.length > 0 && (
+                  <div className="p-1 bg-white/50 dark:bg-white/10 text-theme-900/90 dark:text-white/90 text-xs">
+                    {serviceBookmarkResults.map((result) => (
+                      <button
+                        key={[result.name, result.container, result.app, result.href].filter((part) => part).join("-")}
+                        type="button"
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          openServiceBookmarkResult(result);
+                        }}
+                        className="flex w-full items-center justify-between rounded-md px-2 py-1 text-left hover:bg-theme-300/20 dark:hover:bg-white/10"
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          {(result.icon || result.abbr) && (
+                            <span className="w-4 shrink-0 text-[0.65rem]">
+                              {result.icon && <ResolvedIcon icon={result.icon} />}
+                              {result.abbr && result.abbr}
                             </span>
-                          </div>
-                        );
-                      }}
-                    </ComboboxOption>
-                  ))}
-                </div>
-              </ComboboxOptions>
+                          )}
+                          <span className="min-w-0">
+                            <span className="block truncate">{result.name}</span>
+                            {result.description && (
+                              <span className="block truncate text-[0.65rem] text-theme-600/80 dark:text-theme-200/70">
+                                {result.description}
+                              </span>
+                            )}
+                          </span>
+                        </span>
+                        <span className="ml-3 shrink-0 text-[0.65rem] font-semibold text-theme-600/80 dark:text-theme-200/70">
+                          {t(`quicklaunch.${result.type ? result.type.toLowerCase() : "bookmark"}`)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {searchSuggestions[1]?.length > 0 && (
+                  <ComboboxOptions className="border-t border-theme-300/60 dark:border-theme-200/20">
+                    <div className="p-1 bg-white/50 dark:bg-white/10 text-theme-900/90 dark:text-white/90 text-xs">
+                      <ComboboxOption key={query} value={query} />
+                      {searchSuggestions[1].map((suggestion) => (
+                        <ComboboxOption
+                          key={suggestion}
+                          value={suggestion}
+                          onMouseDown={() => {
+                            doSearch(suggestion);
+                          }}
+                          className="flex w-full"
+                        >
+                          {({ active }) => {
+                            if (active) currentSuggestion = suggestion;
+                            return (
+                              <div
+                                className={classNames(
+                                  "px-2 py-1 rounded-md w-full flex-nowrap",
+                                  active ? "bg-theme-300/20 dark:bg-white/10" : "",
+                                )}
+                              >
+                                <span className="whitespace-pre">{suggestion.indexOf(query) === 0 ? query : ""}</span>
+                                <span className="mr-4 whitespace-pre opacity-50">
+                                  {suggestion.indexOf(query) === 0 ? suggestion.substring(query.length) : suggestion}
+                                </span>
+                              </div>
+                            );
+                          }}
+                        </ComboboxOption>
+                      ))}
+                    </div>
+                  </ComboboxOptions>
+                )}
+              </div>
             )}
           </Combobox>
         </div>

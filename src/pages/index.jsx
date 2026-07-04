@@ -14,8 +14,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import Script from "next/script";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { BiError } from "react-icons/bi";
-import { BiCog } from "react-icons/bi";
+import { BiCog, BiError } from "react-icons/bi";
 import useSWR, { SWRConfig } from "swr";
 import { ColorContext } from "utils/contexts/color";
 import { SettingsContext } from "utils/contexts/settings";
@@ -472,6 +471,7 @@ function Home({ initialSettings }) {
                       key={i}
                       widget={widget}
                       style={{ header: headerStyle, isRightAligned: false, cardBlur: settings.cardBlur }}
+                      servicesAndBookmarks={servicesAndBookmarks}
                     />
                   ))}
 
@@ -489,6 +489,7 @@ function Home({ initialSettings }) {
                         key={i}
                         widget={widget}
                         style={{ header: headerStyle, isRightAligned: true, cardBlur: settings.cardBlur }}
+                        servicesAndBookmarks={servicesAndBookmarks}
                       />
                     ))}
                 </div>

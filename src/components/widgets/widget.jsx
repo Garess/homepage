@@ -18,13 +18,13 @@ const widgetMappings = {
   bangumi: dynamic(() => import("components/widgets/bangumi/bangumi")),
 };
 
-export default function Widget({ widget, style }) {
+export default function Widget({ widget, style, servicesAndBookmarks }) {
   const InfoWidget = widgetMappings[widget.type];
 
   if (InfoWidget) {
     return (
       <ErrorBoundary>
-        <InfoWidget options={{ ...widget.options, style }} />
+        <InfoWidget options={{ ...widget.options, style }} servicesAndBookmarks={servicesAndBookmarks} />
       </ErrorBoundary>
     );
   }

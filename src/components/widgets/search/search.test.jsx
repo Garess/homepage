@@ -201,4 +201,41 @@ describe("components/widgets/search", () => {
 
     fetch = originalFetch;
   });
+
+  it("shows matching services and bookmarks in the top search results", () => {
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+
+    renderWithProviders(
+      <Search
+        options={{ provider: ["google"], showSearchSuggestions: false, target: "_self" }}
+        servicesAndBookmarks={[
+          {
+            name: "Plex",
+            href: "https://plex.example.test",
+            description: "Media server",
+            type: "service",
+          },
+          {
+            name: "Docs",
+            href: "https://docs.example.test",
+            description: "Knowledge base",
+            type: "bookmark",
+          },
+        ]}
+      />,
+      { settings: { quicklaunch: { searchDescriptions: false } } },
+    );
+
+    const input = screen.getByPlaceholderText("search.placeholder");
+    fireEvent.change(input, { target: { value: "plex" } });
+
+    const serviceResult = screen.getByRole("button", { name: /Plex/i });
+    expect(serviceResult).toBeInTheDocument();
+    expect(screen.queryByText("Docs")).not.toBeInTheDocument();
+
+    fireEvent.mouseDown(serviceResult);
+
+    expect(openSpy).toHaveBeenCalledWith("https://plex.example.test", "_self", "noreferrer");
+    openSpy.mockRestore();
+  });
 });
