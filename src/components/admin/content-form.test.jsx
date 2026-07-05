@@ -75,7 +75,7 @@ describe("components/admin/content forms", () => {
     expect(await screen.findByDisplayValue("Homepage")).toBeInTheDocument();
 
     fireEvent.change(screen.getByDisplayValue("Homepage"), { target: { value: "Homepage Admin" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存服务" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
@@ -97,7 +97,8 @@ describe("components/admin/content forms", () => {
       }),
     );
     expect(fetch).toHaveBeenCalledWith("/api/revalidate");
-    expect(location.reload).toHaveBeenCalledTimes(1);
+    expect(location.reload).not.toHaveBeenCalled();
+    expect(await screen.findByText("服务已保存。")).toBeInTheDocument();
   });
 
   it("edits bookmark groups and saves structured bookmarks data", async () => {
@@ -114,7 +115,7 @@ describe("components/admin/content forms", () => {
 
     fireEvent.change(screen.getByDisplayValue("Github"), { target: { value: "GitHub Docs" } });
     fireEvent.change(screen.getByDisplayValue("GH"), { target: { value: "GD" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存书签" }));
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith("/api/admin/config/bookmarks", expect.any(Object));
@@ -130,5 +131,7 @@ describe("components/admin/content forms", () => {
         description: "Code",
       }),
     );
+    expect(location.reload).not.toHaveBeenCalled();
+    expect(await screen.findByText("书签已保存。")).toBeInTheDocument();
   });
 });

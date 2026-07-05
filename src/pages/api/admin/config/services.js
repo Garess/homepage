@@ -48,7 +48,21 @@ function serviceRecord(service) {
   Object.entries(service).forEach(([key, value]) => {
     if (key === "name" || key === "type" || key === "groups") return;
     if (value === "" || value === undefined || value === null) return;
-    if (key === "widgets" && Array.isArray(value) && value.length === 0) return;
+    if (key === "widgets" && Array.isArray(value)) {
+      const widgets = value
+        .filter((widget) => isPlainObject(widget))
+        .map((widget) =>
+          Object.fromEntries(
+            Object.entries(widget).filter(
+              ([, widgetValue]) => widgetValue !== "" && widgetValue !== undefined && widgetValue !== null,
+            ),
+          ),
+        )
+        .filter((widget) => Object.keys(widget).length > 0);
+      if (widgets.length === 0) return;
+      record[key] = widgets;
+      return;
+    }
     record[key] = value;
   });
   return record;

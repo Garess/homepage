@@ -1,4 +1,7 @@
 /* eslint-disable react/no-array-index-key */
+import { promises as fs } from "fs";
+import path from "path";
+
 import classNames from "classnames";
 import BookmarksGroup from "components/bookmarks/group";
 import ErrorBoundary from "components/errorboundry";
@@ -52,6 +55,14 @@ const normalizeLanguage = (language) => {
   return alias || language;
 };
 
+async function readChineseReadme() {
+  try {
+    return await fs.readFile(path.join(process.cwd(), "README.zh-CN.md"), "utf8");
+  } catch {
+    return "";
+  }
+}
+
 export async function getStaticProps() {
   let logger;
   try {
@@ -62,10 +73,12 @@ export async function getStaticProps() {
     const bookmarks = await bookmarksResponse();
     const widgets = await widgetsResponse();
     const language = normalizeLanguage(settings.language);
+    const chineseReadme = await readChineseReadme();
 
     return {
       props: {
         initialSettings: settings,
+        chineseReadme,
         fallback: {
           "/api/services": services,
           "/api/bookmarks": bookmarks,
@@ -79,9 +92,11 @@ export async function getStaticProps() {
     if (logger && e) {
       logger.error(e);
     }
+    const chineseReadme = await readChineseReadme();
     return {
       props: {
         initialSettings: {},
+        chineseReadme,
         fallback: {
           "/api/services": [],
           "/api/bookmarks": [],
@@ -94,7 +109,104 @@ export async function getStaticProps() {
   }
 }
 
-function Index({ initialSettings, fallback }) {
+function MarkdownBlocks({ content }) {
+  const blocks = [];
+  const lines = content.split("\n");
+  let codeBlock = null;
+
+  function flushCodeBlock() {
+    if (!codeBlock) return;
+    blocks.push({ type: "code", value: codeBlock.lines.join("\n") });
+    codeBlock = null;
+  }
+
+  lines.forEach((line) => {
+    if (line.startsWith("```")) {
+      if (codeBlock) {
+        flushCodeBlock();
+      } else {
+        codeBlock = { lines: [] };
+      }
+      return;
+    }
+
+    if (codeBlock) {
+      codeBlock.lines.push(line);
+      return;
+    }
+
+    if (!line.trim()) return;
+
+    if (line.startsWith("### ")) blocks.push({ type: "h3", value: line.slice(4) });
+    else if (line.startsWith("## ")) blocks.push({ type: "h2", value: line.slice(3) });
+    else if (line.startsWith("# ")) blocks.push({ type: "h1", value: line.slice(2) });
+    else if (line.startsWith("- ")) blocks.push({ type: "li", value: line.slice(2) });
+    else blocks.push({ type: "p", value: line });
+  });
+  flushCodeBlock();
+
+  return blocks.map((block, index) => {
+    if (block.type === "h1") {
+      return (
+        <h2 key={index} className="text-xl font-semibold text-theme-800 dark:text-theme-100">
+          {block.value}
+        </h2>
+      );
+    }
+    if (block.type === "h2") {
+      return (
+        <h3 key={index} className="mt-5 text-base font-semibold text-theme-800 dark:text-theme-100">
+          {block.value}
+        </h3>
+      );
+    }
+    if (block.type === "h3") {
+      return (
+        <h4 key={index} className="mt-4 text-sm font-semibold text-theme-700 dark:text-theme-200">
+          {block.value}
+        </h4>
+      );
+    }
+    if (block.type === "li") {
+      return (
+        <div key={index} className="flex gap-2 text-sm text-theme-700 dark:text-theme-200">
+          <span aria-hidden="true">-</span>
+          <span>{block.value}</span>
+        </div>
+      );
+    }
+    if (block.type === "code") {
+      return (
+        <pre
+          key={index}
+          className="overflow-x-auto rounded-md bg-theme-900/5 p-3 text-xs text-theme-800 dark:bg-white/10 dark:text-theme-100"
+        >
+          <code>{block.value}</code>
+        </pre>
+      );
+    }
+    return (
+      <p key={index} className="text-sm leading-6 text-theme-700 dark:text-theme-200">
+        {block.value}
+      </p>
+    );
+  });
+}
+
+function ChineseReadme({ content }) {
+  if (!content?.trim()) return null;
+
+  return (
+    <section
+      id="chinese-readme"
+      className="m-4 grid gap-3 rounded-md border border-theme-500/10 bg-white/70 p-5 shadow-sm dark:bg-white/5 sm:m-8"
+    >
+      <MarkdownBlocks content={content} />
+    </section>
+  );
+}
+
+function Index({ initialSettings, fallback, chineseReadme }) {
   const windowFocused = useWindowFocus();
   const [stale, setStale] = useState(false);
   const { data: errorsData } = useSWR("/api/validate");
@@ -185,7 +297,7 @@ function Index({ initialSettings, fallback }) {
   return (
     <SWRConfig value={{ fallback, fetcher: (resource, init) => fetch(resource, init).then((res) => res.json()) }}>
       <ErrorBoundary>
-        <Home initialSettings={initialSettings} />
+        <Home initialSettings={initialSettings} chineseReadme={chineseReadme} />
       </ErrorBoundary>
     </SWRConfig>
   );
@@ -211,7 +323,7 @@ function getAllServices(services) {
   return [...services.map(getServices).flat()];
 }
 
-function Home({ initialSettings }) {
+function Home({ initialSettings, chineseReadme }) {
   const { i18n } = useTranslation();
   const { theme, setTheme } = useContext(ThemeContext);
   const { color, setColor } = useContext(ColorContext);
@@ -500,6 +612,8 @@ function Home({ initialSettings }) {
 
         {servicesAndBookmarksGroups}
 
+        <ChineseReadme content={chineseReadme} />
+
         <div id="footer" className="flex flex-col mt-auto p-8 w-full">
           <div id="style" className="flex w-full justify-end">
             <a
@@ -523,7 +637,7 @@ function Home({ initialSettings }) {
   );
 }
 
-export default function Wrapper({ initialSettings, fallback }) {
+export default function Wrapper({ initialSettings, fallback, chineseReadme }) {
   const { theme } = useContext(ThemeContext);
   const { color } = useContext(ColorContext);
   let backgroundImage = "";
@@ -594,7 +708,7 @@ export default function Wrapper({ initialSettings, fallback }) {
             backgroundBrightness && `backdrop-brightness-${initialSettings.background.brightness}`,
           )}
         >
-          <Index initialSettings={initialSettings} fallback={fallback} />
+          <Index initialSettings={initialSettings} fallback={fallback} chineseReadme={chineseReadme} />
         </div>
       </div>
     </>

@@ -224,6 +224,7 @@ describe("pages/index getStaticProps", () => {
 async function renderIndex({
   initialSettings = { title: "Homepage", layout: {} },
   fallback = {},
+  chineseReadme = "",
   theme = "dark",
   color = "slate",
   activeTab = "",
@@ -241,7 +242,7 @@ async function renderIndex({
       <ColorContext.Provider value={{ color, setColor }}>
         <SettingsContext.Provider value={{ settings, setSettings }}>
           <TabContext.Provider value={{ activeTab, setActiveTab }}>
-            <Wrapper initialSettings={initialSettings} fallback={fallback} />
+            <Wrapper initialSettings={initialSettings} fallback={fallback} chineseReadme={chineseReadme} />
           </TabContext.Provider>
         </SettingsContext.Provider>
       </ColorContext.Provider>
@@ -432,6 +433,17 @@ describe("pages/index Home behavior", () => {
 
     expect(await screen.findByTestId("services-group")).toHaveTextContent("Services");
     expect(screen.getByTestId("bookmarks-group")).toHaveTextContent("Bookmarks");
+  });
+
+  it("renders the Chinese readme below the homepage content when provided", async () => {
+    await renderIndex({
+      initialSettings: { title: "Homepage", layout: {} },
+      settings: { title: "Homepage", layout: {}, language: "en" },
+      chineseReadme: "# Homepage 中文说明\n\n这是一个基于 Homepage 的自托管主页仪表盘 fork。",
+    });
+
+    expect(await screen.findByText("Homepage 中文说明")).toBeInTheDocument();
+    expect(screen.getByText("这是一个基于 Homepage 的自托管主页仪表盘 fork。")).toBeInTheDocument();
   });
 
   it("renders tab navigation and filters groups by active tab", async () => {

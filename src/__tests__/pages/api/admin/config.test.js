@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -199,6 +199,11 @@ describe("pages/api/admin/config", () => {
             icon: "plex.png",
             description: "Updated movies",
           },
+          {
+            name: "New Service",
+            href: "https://new.example.com",
+            widgets: [{ type: "", url: "" }],
+          },
         ],
         groups: [
           {
@@ -227,6 +232,11 @@ describe("pages/api/admin/config", () => {
               href: "https://plex.example.com",
               icon: "plex.png",
               description: "Updated movies",
+            },
+          },
+          {
+            "New Service": {
+              href: "https://new.example.com",
             },
           },
           {

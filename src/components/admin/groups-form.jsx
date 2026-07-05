@@ -47,6 +47,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -81,6 +82,7 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
   async function handleSave() {
     setSaving(true);
     setError("");
+    setSuccess("");
     try {
       const response = await fetch(endpoint, {
         method: "PUT",
@@ -91,8 +93,9 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
       if (!response.ok) {
         throw new Error(data.error || `${title}保存失败。`);
       }
+      setGroups((Array.isArray(data) ? data : []).map((group) => normalizeGroup(kind, group)));
       await fetch("/api/revalidate");
-      window.location.reload();
+      setSuccess(`${title}已保存。`);
     } catch (err) {
       setError(err.message || `${title}保存失败。`);
     } finally {
@@ -108,17 +111,26 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">{title}</h2>
-        <button type="button" onClick={addGroup} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+        <button
+          type="button"
+          onClick={addGroup}
+          className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+        >
           <BiPlus />
           添加分组
         </button>
       </div>
 
-      {groups.length === 0 && <div className="rounded-md border border-dashed p-6 text-sm text-theme-600">{emptyLabel}</div>}
+      {groups.length === 0 && (
+        <div className="rounded-md border border-dashed p-6 text-sm text-theme-600">{emptyLabel}</div>
+      )}
 
       <div className="grid gap-4">
         {groups.map((group, groupIndex) => (
-          <section key={groupIndex} className="grid gap-4 rounded-md border border-theme-500/10 bg-white/70 p-4 shadow-sm dark:bg-white/5">
+          <section
+            key={groupIndex}
+            className="grid gap-4 rounded-md border border-theme-500/10 bg-white/70 p-4 shadow-sm dark:bg-white/5"
+          >
             <div className="flex items-center gap-3">
               <input
                 className="min-w-0 flex-1 rounded-md border bg-transparent px-3 py-2 text-sm"
@@ -139,7 +151,10 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
             {kind === "bookmarks" ? (
               <div className="grid gap-3">
                 {group.bookmarks.map((bookmark, bookmarkIndex) => (
-                  <div key={bookmarkIndex} className="grid gap-3 rounded-md border border-theme-500/10 p-3 md:grid-cols-2">
+                  <div
+                    key={bookmarkIndex}
+                    className="grid gap-3 rounded-md border border-theme-500/10 p-3 md:grid-cols-2"
+                  >
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
                       placeholder="名称"
@@ -204,31 +219,48 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
             ) : (
               <div className="grid gap-3">
                 {group.services.map((service, serviceIndex) => (
-                  <div key={serviceIndex} className="grid gap-3 rounded-md border border-theme-500/10 p-3 md:grid-cols-2">
+                  <div
+                    key={serviceIndex}
+                    className="grid gap-3 rounded-md border border-theme-500/10 p-3 md:grid-cols-2"
+                  >
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
                       placeholder="名称"
                       value={service.name || ""}
-                      onChange={(e) => updateGroup(groupIndex, { services: updateService(group, serviceIndex, { name: e.target.value }) })}
+                      onChange={(e) =>
+                        updateGroup(groupIndex, {
+                          services: updateService(group, serviceIndex, { name: e.target.value }),
+                        })
+                      }
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
                       placeholder="链接"
                       value={service.href || ""}
-                      onChange={(e) => updateGroup(groupIndex, { services: updateService(group, serviceIndex, { href: e.target.value }) })}
+                      onChange={(e) =>
+                        updateGroup(groupIndex, {
+                          services: updateService(group, serviceIndex, { href: e.target.value }),
+                        })
+                      }
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
                       placeholder="图标"
                       value={service.icon || ""}
-                      onChange={(e) => updateGroup(groupIndex, { services: updateService(group, serviceIndex, { icon: e.target.value }) })}
+                      onChange={(e) =>
+                        updateGroup(groupIndex, {
+                          services: updateService(group, serviceIndex, { icon: e.target.value }),
+                        })
+                      }
                     />
                     <input
                       className="rounded-md border bg-transparent px-3 py-2 text-sm"
                       placeholder="描述"
                       value={service.description || ""}
                       onChange={(e) =>
-                        updateGroup(groupIndex, { services: updateService(group, serviceIndex, { description: e.target.value }) })
+                        updateGroup(groupIndex, {
+                          services: updateService(group, serviceIndex, { description: e.target.value }),
+                        })
                       }
                     />
                     <input
@@ -267,17 +299,29 @@ export default function GroupsForm({ kind, endpoint, title, emptyLabel }) {
         ))}
       </div>
 
-      {error && <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-200">{error}</div>}
+      {error && (
+        <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-200">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-200">
+          {success}
+        </div>
+      )}
 
       <div className="flex justify-end">
         <button
           type="button"
           disabled={!canSave || saving}
           onClick={handleSave}
-          className={classNames("inline-flex items-center gap-2 rounded-md bg-theme-600 px-3 py-2 text-sm text-white", saving && "opacity-60")}
+          className={classNames(
+            "inline-flex items-center gap-2 rounded-md bg-theme-600 px-3 py-2 text-sm text-white",
+            saving && "opacity-60",
+          )}
         >
           <BiSave />
-          保存
+          保存{title}
         </button>
       </div>
     </div>

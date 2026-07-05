@@ -206,4 +206,3 @@ pnpm test
 - 信息 widget：`src/components/widgets`
 - 配置读取与写回：`src/utils/config`
 - Bangumi 工具：`src/utils/bangumi`
-
